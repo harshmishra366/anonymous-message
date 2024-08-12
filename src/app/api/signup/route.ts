@@ -3,11 +3,11 @@ import UserModel from "@/models/User.model";
 import { message } from "@/schema/message";
 import bcryptjs from "bcryptjs"
 import { use } from "react";
-import VerificationEmail from "../../../emails/VerificationEmails";
+import VerificationEmail from "../../../../emails/VerificationEmails"
 import { sendVerifyEmails } from "@/helpers/verificationEmail";
 
 
-export default async function POST(request:Request){
+export  async function POST(request:Request){
 
     await dbConnect()
     try {

@@ -14,7 +14,7 @@ export  async function POST(request:Request){
         const {username,email,password}= await request.json()
         if(!email && !username &&!password){
             return Response.json({
-                message:"All the fields are require"
+                message:"All the fields are required"
             })
         }
 
@@ -105,6 +105,7 @@ export  async function POST(request:Request){
        
     } catch (error:any) {
         console.log("Error regestering user",error.message);
+        console.error(error);
         return Response.json({
             success:false,
             message:"Error regestering user"

@@ -1,23 +1,5 @@
 "use client";
-// import { useSession, signIn, signOut } from "next-auth/react"
 
-// export default function Component() {
-//   const { data: session } = useSession()
-//   if (session) {
-//     return (
-//       <>
-//         Signed in as {session.user.email} <br />
-//         <button onClick={() => signOut()}>Sign out</button>
-//       </>
-//     )
-//   }
-//   return (
-//     <>
-//       Not signed in <br />
-//       <button onClick={() => signIn()}>Sign in</button>
-//     </>
-//   )
-// }
 import React, { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { useToast } from "@/hooks/use-toast";
@@ -40,98 +22,64 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { sigInschema } from "@/schema/signInSchema";
+import { signIn } from "next-auth/react";
 
 const page = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [isusernameMessage, setIsusernameMessage] = useState("");
-  const debouncedUsername = useDebounceValue(username, 300);
+
+ 
+ 
   const toast = useToast();
   const router = useRouter();
   // zod implementation
   const form = useForm({
-    resolver: zodResolver(signUpSchema), // <z.infer<typeof signUpSchema>>
+    resolver: zodResolver(sigInschema), // <z.infer<typeof signUpSchema>>
     defaultValues: {
-      username: "",
+      
 
-      email: "",
+      identifier: "",
       password: "",
     },
   });
-  useEffect(() => {
-    const isUsernameAvailable = async () => {
-      if (debouncedUsername) {
-        setIsusernameMessage("");
-        setLoading(true);
-        try {
-          const response = await axios.get(
-            `/api/username-unique?username=${debouncedUsername}`
-          );
-          setIsusernameMessage(response.data.message);
-        } catch (error) {
-          setIsusernameMessage("Error checking username");
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-    isUsernameAvailable();
-  }, [debouncedUsername]);
-
+  
   const onSubmit = async (data:any) => {
-    console.log(data);
-    setLoading(true);
-    try {
-      const reaponse = await axios.postForm("/api/signup", data);
-      setSuccess(true);
-      // toast({
-      //   title: "Account created",
-      //   description: "You have successfully created an account",
-      //   status: "success",
-      // })
-      router.replace(`/verify/${username}`);
-      setLoading(false);
-    } catch (error) {
-      console.log(error);
-      setIsusernameMessage("Error siging in");
+    console.log("dwsdsd",data);
+   const result= await signIn("credentials", {
+    redirect: false,
+      identifier:data.identifier,
+      password:data.password,
+    })
+    ;
+    console.log(result);
+    if(result?.error) {
+      toast.toast({
+        title: "Error",
+        description: result.error,
+        variant: "destructive",
+      })
     }
-    setLoading(false);
+    if(result?.url) {
+      router.replace("/dashboard");
+    }
+    
+    
   };
   return (
-    <div className="flex justify-center bg-gray-400 min-h-screen">
-      <div className="">Join the Anonmyous Message Community</div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        Sign In to Your Account
+      </h1>
+      
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="username"
-                    {...field}
-                    onChange={(e) => {
-                      setUsername(e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          
            <FormField
           control={form.control}
-          name="email"
+          name="identifier" 
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Email </FormLabel>
               <FormControl>
                 <Input placeholder="email" {...field}
                 
@@ -149,7 +97,7 @@ const page = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>password</FormLabel>
               <FormControl>
                 <Input placeholder="password" {...field}
                 
@@ -161,11 +109,13 @@ const page = () => {
             </FormItem>
           )}
         />
-        <Button type="submit" isLoading={loading}>
-          Sign up
+        <Button type="submit">
+          Sign In
         </Button>
         </form>
+      
       </Form>
+      </div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const sigIn= z.object({
+export const sigInschema= z.object({
     Identifier:z.string(),
     password:z.string()
 })
